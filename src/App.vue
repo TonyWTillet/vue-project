@@ -21,8 +21,50 @@
 
 
   <div>
-    <h2>Vue Syntaxe</h2>
-    <p>Vue.js is a progressive JavaScript framework for building user interfaces. It's designed to be incrementally adoptable, meaning you can start with just a few components and add more as your application grows.</p>
+    <h2>Top Series</h2>
+    <div class="flex justify-center">
+      <button class="sm-btn" @click="sortSeries">Sort by rating</button>
+    </div>
+    
+    <ul>
+      <li v-for="serie in topSeries" :key="serie.title">
+        <div class="flex justify-between align-center">
+          <div class="flex flex-column">
+            <h3>{{ serie.title }}</h3>
+            <p mb-0>{{ serie.year }} - {{ serie.rating }} / 10</p>
+          </div>
+          <div class="flex flex-column">
+            <button class="sm-btn btn-dark" @click="deleteSerie(serie.title)">I don't approve</button>
+            <button class="sm-btn" @click="approveSerie(serie.title)">Damn, it's good!</button>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <h2>Tell me your favorite serie</h2>
+    <form class="form-container" @submit.prevent="addSerie">
+      <div v-if="errorMessage" class="form-error">
+        <p class="error-message">{{ errorMessage }}</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="serie-title">Serie Title</label>
+        <input class="form-input" type="text" id="serie-title" v-model="newSerie" placeholder="Enter the title of your favorite serie">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="serie-year">Year</label>
+        <input class="form-input" type="number" id="serie-year" v-model="newSerieYear" placeholder="Enter the year of your favorite serie">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="serie-rating">Rating</label>
+        <input class="form-input" step="0.5" type="number" id="serie-rating" v-model="newSerieRating" placeholder="Enter the rating of your favorite serie">
+      </div>
+      <div class="form-group">
+        <button class="form-submit">Add</button>
+      </div>
+      
+    </form>
   </div>
 
 
@@ -31,15 +73,72 @@
 <script setup>
 import { ref } from 'vue'
 
-const lastname = 'Tillet'
-const firstName = 'Tony'
-
-const title = '<h1>Hello, Tony Tillet</h1>'
+const title = '<h1>Hello I\'m, Tony Tillet</h1>'
 
 const count = ref(0)
+const newSerie = ref('')
+const newSerieYear = ref('')
+const newSerieRating = ref('')
+const errorMessage = ref('')
 
 const increment = () => {
   count.value++
+}
+
+const topSeries = ref([
+  {
+    title: 'Breaking Bad',
+    year: 2008,
+    rating: 7.5
+  }, 
+  { 
+    title: 'Lucifer',
+    year: 2016,
+    rating: 8.5
+  },
+  {
+    title: 'The Office',
+    year: 2005,
+    rating: 8.5
+  },
+  {
+    title: 'The Mentalist',
+    year: 2008,
+    rating: 9.5
+  }
+])
+
+const deleteSerie = (serie) => {
+  topSeries.value = topSeries.value.filter(s => s.title !== serie)
+}
+
+const sortSeries = (serie) => {
+  topSeries.value = topSeries.value.sort((a, b) => b.rating - a.rating)
+}
+
+const addSerie = () => {
+  const existingSerie = topSeries.value.find(s => s.title.toLowerCase() === newSerie.value.toLowerCase())
+
+  if (!newSerie.value) {
+    errorMessage.value = 'Please enter a valid serie title'
+    return
+  }
+
+  if (existingSerie) {
+    errorMessage.value = 'This series is already in the list!'
+    return
+  }
+  
+  errorMessage.value = ''
+  topSeries.value.push({
+    title: newSerie.value,
+    year: newSerieYear.value,
+    rating: newSerieRating.value
+  })
+  
+  newSerie.value = ''
+  newSerieYear.value = ''
+  newSerieRating.value = ''
 }
 
 </script>
@@ -60,6 +159,152 @@ body {
   line-height: 1.6;
   padding: 2rem;
 }
+
+/* Basics flex styles */
+.flex {
+  display: flex;
+}
+.flex-column {
+  flex-direction: column;
+}
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+.align-center {
+  align-items: center;
+}
+.align-content-center {
+  align-content: center;
+}
+
+/* Form styles */
+.form-container {
+  max-width: 100%;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  border-radius: 1rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #ff7a00;
+  box-shadow: 0 0 0 2px rgba(255, 122, 0, 0.2);
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.form-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.form-error {
+  color: #ff4d4d;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.form-submit {
+  width: 100%;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  padding: 1rem;
+  background: linear-gradient(135deg, #ff7a00, #ff4d00);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.form-submit:hover {
+  background: linear-gradient(135deg, #ff8c24, #ff6224);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 122, 0, 0.4);
+}
+
+.form-submit:active {
+  transform: translateY(1px);
+}
+
+.form-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+
+/* List styles */
+ul {
+  list-style: none;
+  padding: 1rem;
+  margin: 1rem 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  border-radius: 1rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+li {
+  font-size: 1.1rem;
+  color: #fff;
+  padding: 0.8rem 1.2rem;
+  margin: 0.5rem 0;
+  background: linear-gradient(135deg, rgba(255,122,0,0.2), rgba(255,77,0,0.1));
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+li:hover {
+  transform: translateX(5px);
+  background: linear-gradient(135deg, rgba(255,140,36,0.3), rgba(255,98,36,0.2));
+  box-shadow: 0 2px 10px rgba(255, 122, 0, 0.2);
+}
+
+li:first-child {
+  margin-top: 0;
+}
+
+li:last-child {
+  margin-bottom: 0;
+}
+
 
 /* Margin classes */
 .m-1 {
@@ -285,6 +530,20 @@ button:hover {
 
 button:active {
   transform: translateY(1px);
+}
+
+.sm-btn {
+  font-size: 0.8rem;
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+}
+
+.btn-dark {
+  background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+}
+
+.btn-dark:hover {
+  background: linear-gradient(135deg, #3c3c3c, #2a2a2a);
 }
 
 /* Dark button styles */
