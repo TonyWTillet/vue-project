@@ -1,10 +1,23 @@
 <template>
   <div v-html="title"></div>
 
-  <h2> Today coffee : </h2>  
+  <h2> Hi, I'm Tony Tillet and you are 
+    <input type="text" v-model="name" class="form-input transparent-input" placeholder="Enter your name">
+  </h2>
+
+  <section>
+    <h3> Timer </h3>
+    <p> Wait for it... {{ time }} </p>
+
+    <button class="btn-dark" @click="clearTimer" v-if="time > 10"> Long time you've been waiting for this? </button>
+  </section>
+  
+
+  <section>
+  <h3> {{ name }} Tel me how many cups of coffee you drank today : </h3>  
   <button @click="count++">Add</button>
   <button @click="count--">Remove</button>
-  <button v-on:click="increment" class="button-dark">One more?</button>
+  <button v-on:click="increment" class="button-dark">The truth is out there</button>
   <span :style="{ color: count > 4 ? '#ff0000' : ''}" :class="`color-${count} ml-5`">{{ count }}</span>
 
   <div class="mt-3" v-show="count > 4">
@@ -18,10 +31,11 @@
   <div class="mt-3" v-else-if="count == 2">
     <p>Perfect! You're drinking just the right amount of coffee. It's good for your health and your productivity.</p>
   </div>
+</section>
 
-
+<section>
   <div>
-    <h2>Top Series</h2>
+    <h3>My Top Series</h3>
     <div class="flex justify-center">
       <button class="sm-btn" @click="sortSeries">Sort by rating</button>
     </div>
@@ -30,7 +44,7 @@
       <li v-for="serie in topSeries" :key="serie.title">
         <div class="flex justify-between align-center">
           <div class="flex flex-column">
-            <h3>{{ serie.title }}</h3>
+            <h4>{{ serie.title }}</h4>
             <p mb-0>{{ serie.year }} - {{ serie.rating }} / 10</p>
           </div>
           <div class="flex flex-column">
@@ -43,7 +57,7 @@
   </div>
 
   <div>
-    <h2>Tell me your favorite serie</h2>
+    <h3>Tell me your favorite serie</h3>
     <form class="form-container" @submit.prevent="addSerie">
       <div v-if="errorMessage" class="form-error">
         <p class="error-message">{{ errorMessage }}</p>
@@ -66,14 +80,42 @@
       
     </form>
   </div>
+</section>
+
 
 
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref , watch, watchEffect } from 'vue'
+import { useTimer } from './composable/userTimer'
+const page = ref({
+  title: 'Home',
+})
 
-const title = '<h1>Hello I\'m, Tony Tillet</h1>'
+const name = ref('')
+
+// watch is for when you want to watch a reactive object
+watch(() => page.value.title, (newTitle, oldTitle) => {
+  document.title = `Hello ${newTitle}`
+}, {once: true})
+
+// watchEffect is for when you want to watch a reactive object
+watchEffect(() => {
+  document.title = `Hello ${name.value}`
+})
+// Computed is for deriving a value from reactive data and caching the result until dependencies change
+// Watch is for side effects and reacting to data changes without caching
+// Examples:
+// - Computed: Filtering a todo list, calculating totals, formatting data
+// - Watch: Making API calls, updating DOM, triggering side effects when data changes
+// The Trello example would actually be better with computed for derived board data
+// And drag/drop would use watch to handle side effects of position changes
+
+const {time, clearTimer} = useTimer()
+
+
+const title = '<h1>Welcome to my Vue.js demo project</h1>'
 
 const count = ref(0)
 const newSerie = ref('')
@@ -152,6 +194,10 @@ const addSerie = () => {
   box-sizing: border-box;
 }
 
+h1{
+text-align: center;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: #080d10;
@@ -159,6 +205,37 @@ body {
   line-height: 1.6;
   padding: 2rem;
 }
+
+/* Section styles */
+section {
+  margin: 3rem 0;
+  padding: 2.5rem;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  border-radius: 1.5rem;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+section:hover {
+  transform: translateY(-4px);
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04));
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+}
+
+section h3 {
+  background: linear-gradient(to right, #fff, #ff8c24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2rem;
+}
+
+section p {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.8;
+}
+
 
 /* Basics flex styles */
 .flex {
@@ -205,6 +282,20 @@ body {
   font-weight: 500;
   margin-bottom: 0.5rem;
   color: #fff;
+}
+
+.form-input.transparent-input {
+  font-size: 3rem;
+  background: transparent;
+  border: none;
+  color: #fff;
+  margin: 0;
+  padding: 0 1rem;
+  width: auto;
+  display: inline-block;
+  background: linear-gradient(to right, #fff, #ff8c24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .form-input {
@@ -591,6 +682,14 @@ h1 {
 
 h2 {
   font-size: 3rem;
+  background: linear-gradient(to right, #fff, #ff8c24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 2rem 0 1rem;
+}
+
+h3 {
+  font-size: 2rem;
   background: linear-gradient(to right, #fff, #ff8c24);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
